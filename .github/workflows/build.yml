@@ -34,12 +34,14 @@ jobs:
 
       - name: Get Build Info
         id: buildinfo
+        shell: bash
         run: |
           echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          if [ "${GITHUB_REF#refs/tags/}" != "$GITHUB_REF" ]; then
             echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           else
             echo "VERSION=dev" >> $GITHUB_ENV
+          fi
 
       - name: Build
         run: |
