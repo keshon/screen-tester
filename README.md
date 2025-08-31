@@ -3,26 +3,44 @@
 A simple fullscreen monitor testing tool written in Go using the [Pixel](https://github.com/faiface/pixel) library.  
 It provides several test screens for checking colors, gradients, dead pixels, motion clarity, and subpixel layouts.
 
-## Features
+---
 
-- Solid color fills (Red, Green, Blue, White, Black, Gray)
-- Horizontal and vertical gradients
-- Checkerboard and pixel grid patterns
-- Dead pixel recovery flicker
-- Motion test with bouncing balls
-- Subpixel rendering test
+## Available tests
+* **`Red`**  
+  Solid red screen
 
-## Controls
+* **`Green`**  
+  Solid green screen
 
-- **Left / Right Arrow**: Switch between tests  
-- **F1**: Toggle info overlay  
-- **Esc**: Exit the program  
+* **`Blue`**  
+  Solid blue screen
 
-Per-test controls:
+* **`White`**  
+  Solid white screen
 
-- **Brightness tests**: Adjust brightness with **Up / Down**  
-- **Speed tests**: Adjust flicker or motion speed with **Up / Down**  
-- **Motion / Subpixel tests**: Use **Shift + Up/Down** for background or channel adjustments  
+* **`Black`**  
+  Solid black screen
+
+* **`Horizontal Gradient`**  
+  Black to white gradient (Shift+Up/Down to invert)
+
+* **`Vertical Gradient`**  
+  Black to white gradient (Shift+Up/Down to invert)
+
+* **`Small Checkerboard`**  
+  Black & white checkerboard with adjustable square size (Shift+Up/Down)
+
+* **`Pixel Grid`**  
+  Grid overlay with adjustable cells size (Shift+Up/Down)
+
+* **`Motion Balls`**  
+  Bouncing balls with background cycling (Up/Down: background, Shift+Up/Down: speed)
+
+* **`Dead Pixel Recovery`**  
+  Flashes colors to exercise dead pixels (Shift+Up/Down to adjust speed)
+
+
+---
 
 ## Requirements
 
@@ -38,10 +56,3 @@ Per-test controls:
 git clone https://github.com/keshon/screen-tester.git
 cd screen-tester
 go run .
-```
-
-or in Windows
-
-```bash
-build-n-run.bat
-```

@@ -47,7 +47,7 @@ type bgState struct {
 
 func (t *MotionBalls) Name() string { return "Motion Balls" }
 func (t *MotionBalls) Description() string {
-	return "Bouncing balls with background cycling (Shift+Up/Down: background, Up/Down: speed)"
+	return "Bouncing balls with background cycling (Up/Down: background, Shift+Up/Down: speed)"
 }
 func (t *MotionBalls) Order() int { return 51 }
 

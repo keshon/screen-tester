@@ -17,7 +17,7 @@ type PixelGrid struct {
 	step        int
 }
 
-func (t *PixelGrid) Name() string { return "Large Pixel Grid" }
+func (t *PixelGrid) Name() string { return "Pixel Grid" }
 func (t *PixelGrid) Description() string {
 	return "Grid overlay with adjustable cells size (Shift+Up/Down)"
 }

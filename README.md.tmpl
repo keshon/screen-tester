@@ -1,0 +1,30 @@
+# Screen Tester - Monitor test tool
+
+A simple fullscreen monitor testing tool written in Go using the [Pixel](https://github.com/faiface/pixel) library.  
+It provides several test screens for checking colors, gradients, dead pixels, motion clarity, and subpixel layouts.
+
+---
+
+## Available tests
+
+{{- range .Tests }}
+* **`{{ .Name }}`**  
+  {{ .Description }}
+{{ end }}
+
+---
+
+## Requirements
+
+- Go 1.18+  
+- Pixel library dependencies:
+  - `github.com/faiface/pixel`
+  - `github.com/faiface/pixel/imdraw`
+  - `golang.org/x/image`
+
+## Build and Run
+
+```bash
+git clone https://github.com/keshon/screen-tester.git
+cd screen-tester
+go run .
