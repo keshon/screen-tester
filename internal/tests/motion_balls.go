@@ -4,7 +4,7 @@ import (
 	"image/color"
 	"time"
 
-	"app/internal/core"
+	"github.com/keshon/screen-tester/internal/core"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"

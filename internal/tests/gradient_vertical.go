@@ -3,7 +3,7 @@ package tests
 import (
 	"image/color"
 
-	"app/internal/core"
+	"github.com/keshon/screen-tester/internal/core"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"

@@ -3,7 +3,7 @@ package ui
 import (
 	"os"
 
-	"app/internal/core"
+	"github.com/keshon/screen-tester/internal/core"
 
 	"github.com/faiface/pixel/pixelgl"
 )

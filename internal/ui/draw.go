@@ -1,4 +1,3 @@
-// internal/ui/draw.go
 package ui
 
 import (
@@ -12,7 +11,8 @@ import (
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/font/basicfont"
 
-	"app/internal/core"
+	"github.com/keshon/screen-tester/internal/core"
+	"github.com/keshon/screen-tester/internal/version"
 )
 
 var atlas = text.NewAtlas(basicfont.Face7x13, text.ASCII)
@@ -41,12 +41,25 @@ func DrawInfo(ctx *core.WindowContext, test core.ScreenTest, opts core.TestOptio
 		lines = append(lines, core.WrapText(test.Description(), 60)...)
 	}
 
+	lines = append(lines, "")
+	lines = append(lines, "Controls:")
+	lines = append(lines, "Left / Right: Switch tests")
+	lines = append(lines, "F1: Toggle info")
+	lines = append(lines, "ESC: Exit")
+	lines = append(lines, "")
+	lines = append(lines, version.AppFullName)
+	lines = append(lines, version.AppDescription)
+	lines = append(lines, version.AppRepo)
+	lines = append(lines, fmt.Sprintf("Made by %s", version.AppAuthor))
+
 	imd := imdraw.New(nil)
-	imd.Color = color.RGBA{0, 0, 0, 180}
+	imd.Color = color.RGBA{0, 0, 0, 255}
 
 	x := 10.0
 	y := ctx.Win.Bounds().H() - 10.0
-	padding := 6.0
+	paddingTop := 30.0
+	paddingBottom := 10.0
+	paddingSides := 30.0
 	lineHeight := 14.0
 
 	var boxWidth float64
@@ -58,15 +71,17 @@ func DrawInfo(ctx *core.WindowContext, test core.ScreenTest, opts core.TestOptio
 		}
 	}
 
-	boxHeight := float64(len(lines))*lineHeight + padding
-	imd.Push(pixel.V(x, y-boxHeight), pixel.V(x+boxWidth+padding, y))
+	boxHeight := float64(len(lines))*lineHeight + paddingTop + paddingBottom
+
+	imd.Push(pixel.V(x, y-boxHeight), pixel.V(x+boxWidth+paddingSides, y))
 	imd.Rectangle(0)
 	imd.Draw(ctx.Win)
 
 	for i, line := range lines {
-		txt := text.New(pixel.V(x+padding/2, y-lineHeight*float64(i+1)), atlas)
+		txt := text.New(pixel.V(x+paddingSides/2, y-paddingTop-lineHeight*float64(i)), atlas)
 		txt.Color = colornames.White
 		fmt.Fprint(txt, line)
 		txt.Draw(ctx.Win, pixel.IM)
 	}
+
 }

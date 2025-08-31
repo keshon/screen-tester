@@ -1,8 +1,9 @@
 package tests
 
 import (
-	"app/internal/core"
 	"image/color"
+
+	"github.com/keshon/screen-tester/internal/core"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"

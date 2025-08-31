@@ -5,8 +5,8 @@ import (
 	"os"
 	"text/template"
 
-	"app/internal/core"
-	_ "app/internal/tests"
+	"github.com/keshon/screen-tester/internal/core"
+	_ "github.com/keshon/screen-tester/internal/tests"
 )
 
 type TestInfo struct {

@@ -1,8 +1,9 @@
 package tests
 
 import (
-	"app/internal/core"
 	"image/color"
+
+	"github.com/keshon/screen-tester/internal/core"
 )
 
 type SolidGreen struct {

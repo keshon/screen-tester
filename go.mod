@@ -1,4 +1,4 @@
-module app
+module github.com/keshon/screen-tester
 
 go 1.23.0
 

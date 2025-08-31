@@ -4,9 +4,10 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 
-	"app/internal/core"
-	_ "app/internal/tests" // auto-register tests
-	"app/internal/ui"
+	"github.com/keshon/screen-tester/internal/core"
+	_ "github.com/keshon/screen-tester/internal/tests" // auto-register tests
+	"github.com/keshon/screen-tester/internal/ui"
+	"github.com/keshon/screen-tester/internal/version"
 )
 
 func run() {
@@ -14,7 +15,7 @@ func run() {
 	width, height := monitor.Size()
 
 	cfg := pixelgl.WindowConfig{
-		Title:       "Monitor Tester — Señor Mega's Wrath",
+		Title:       version.AppFullName + " " + version.GoVersion + " " + version.BuildDate,
 		Bounds:      pixel.R(0, 0, width, height),
 		Monitor:     monitor,
 		Undecorated: true,
