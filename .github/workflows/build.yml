@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, macos-latest]
         arch: [amd64, arm64]
 
     env:
@@ -27,15 +27,10 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Install system deps for Linux/macOS
-        if: runner.os != 'Windows'
+      - name: Install system deps for macOS
+        if: runner.os == 'macOS'
         run: |
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            sudo apt-get update
-            sudo apt-get install -y libx11-dev libgl1-mesa-dev pkg-config
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            brew install pkg-config
-          fi
+          brew install pkg-config
 
       - name: Get Build Info
         id: buildinfo
@@ -45,7 +40,6 @@ jobs:
             echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           else
             echo "VERSION=dev" >> $GITHUB_ENV
-          fi
 
       - name: Build
         run: |
