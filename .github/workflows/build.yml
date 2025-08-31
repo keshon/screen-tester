@@ -9,12 +9,7 @@ on:
 jobs:
   build:
     name: Build and Upload
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest]
-        arch: [amd64]
-
+    runs-on: windows-latest
     env:
       APP_NAME: screen-tester
 
@@ -26,11 +21,6 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-
-      - name: Install system deps for macOS
-        if: runner.os == 'macos'
-        run: |
-          brew install pkg-config
 
       - name: Get Build Info
         shell: bash
@@ -44,17 +34,11 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          OUTPUT_NAME="${APP_NAME}-${{ matrix.os }}-${{ matrix.arch }}-v${VERSION}"
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            OUTPUT_NAME="${OUTPUT_NAME}.exe"
-            GOOS=windows GOARCH=amd64 go build -o "$OUTPUT_NAME" \
-              -ldflags "-X github.com/keshon/screen-tester/internal/version.BuildDate=${BUILD_DATE} -X github.com/keshon/screen-tester/internal/version.GoVersion=$(go version | awk '{print $3}')" \
-              ./cmd/screen-tester/main.go
-          else
-            GOOS=darwin GOARCH=amd64 go build -o "$OUTPUT_NAME" \
-              -ldflags "-X github.com/keshon/screen-tester/internal/version.BuildDate=${BUILD_DATE} -X github.com/keshon/screen-tester/internal/version.GoVersion=$(go version | awk '{print $3}')" \
-              ./cmd/screen-tester/main.go
-          fi
+          OUTPUT_NAME="${APP_NAME}-windows-amd64-v${VERSION}.exe"
+          echo "Building $OUTPUT_NAME"
+          GOOS=windows GOARCH=amd64 go build -o "$OUTPUT_NAME" \
+            -ldflags "-X github.com/keshon/screen-tester/internal/version.BuildDate=${BUILD_DATE} -X github.com/keshon/screen-tester/internal/version.GoVersion=$(go version | awk '{print $3}')" \
+            ./cmd/screen-tester/main.go
           echo "OUTPUT_NAME=$OUTPUT_NAME" >> $GITHUB_ENV
 
       - name: Upload artifact
