@@ -1,0 +1,63 @@
+name: Build & Release Binaries
+
+on:
+  push:
+    tags:
+      - '*'  # срабатывает на любой тег
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [linux, windows, darwin]
+        arch: [amd64, arm64]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Get build info
+        id: build_info
+        run: |
+          echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+          echo "GO_VERSION=$(go version | awk '{print $3}')" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+
+      - name: Build binary
+        run: |
+          echo "Building for ${{ matrix.os }}/ ${{ matrix.arch }}"
+          base=screen-tester-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}
+          output=$base
+          if [ "${{ matrix.os }}" == "windows" ]; then
+            output=${base}.exe
+          fi
+          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o $output -ldflags "-X github.com/keshon/screen-tester/internal/version.BuildDate=${BUILD_DATE} -X github.com/keshon/screen-tester/internal/version.GoVersion=${GO_VERSION}" ./cmd/screen-tester/main.go
+          echo "Built $output"
+
+      - name: Upload binaries as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: screen-tester-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}
+          path: screen-tester-${VERSION}-*
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: screen-tester-${VERSION}-*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
