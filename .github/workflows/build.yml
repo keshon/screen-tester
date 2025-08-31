@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build and Upload
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -27,11 +27,25 @@ jobs:
         with:
           go-version: '1.21'
 
+      - name: Install system deps for Linux/macOS
+        if: runner.os != 'Windows'
+        run: |
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y libx11-dev libgl1-mesa-dev pkg-config
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            brew install pkg-config
+          fi
+
       - name: Get Build Info
         id: buildinfo
         run: |
           echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
-          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          else
+            echo "VERSION=dev" >> $GITHUB_ENV
+          fi
 
       - name: Build
         run: |
@@ -53,10 +67,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.OUTPUT_NAME }}
+          path: ./release
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -68,9 +82,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Release Asset
+      - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ env.OUTPUT_NAME }}
+          files: ./release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
