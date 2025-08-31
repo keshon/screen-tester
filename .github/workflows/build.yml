@@ -28,12 +28,11 @@ jobs:
           go-version: '1.21'
 
       - name: Install system deps for macOS
-        if: runner.os == 'macos-latest'
+        if: runner.os == 'macos'
         run: |
           brew install pkg-config
 
       - name: Get Build Info
-        id: buildinfo
         shell: bash
         run: |
           echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
@@ -41,16 +40,20 @@ jobs:
             echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           else
             echo "VERSION=dev" >> $GITHUB_ENV
-          fi
 
       - name: Build
+        shell: bash
         run: |
           OUTPUT_NAME="${APP_NAME}-${{ matrix.os }}-${{ matrix.arch }}-v${VERSION}"
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
             OUTPUT_NAME="${OUTPUT_NAME}.exe"
-            GOOS=windows GOARCH=amd64 go build -o "$OUTPUT_NAME" -ldflags "-X github.com/keshon/screen-tester/internal/version.BuildDate=${BUILD_DATE} -X github.com/keshon/screen-tester/internal/version.GoVersion=$(go version | awk '{print $3}')" ./cmd/screen-tester/main.go
+            GOOS=windows GOARCH=amd64 go build -o "$OUTPUT_NAME" \
+              -ldflags "-X github.com/keshon/screen-tester/internal/version.BuildDate=${BUILD_DATE} -X github.com/keshon/screen-tester/internal/version.GoVersion=$(go version | awk '{print $3}')" \
+              ./cmd/screen-tester/main.go
           else
-            go build -o "$OUTPUT_NAME" -ldflags "-X github.com/keshon/screen-tester/internal/version.BuildDate=${BUILD_DATE} -X github.com/keshon/screen-tester/internal/version.GoVersion=$(go version | awk '{print $3}')" ./cmd/screen-tester/main.go
+            GOOS=darwin GOARCH=amd64 go build -o "$OUTPUT_NAME" \
+              -ldflags "-X github.com/keshon/screen-tester/internal/version.BuildDate=${BUILD_DATE} -X github.com/keshon/screen-tester/internal/version.GoVersion=$(go version | awk '{print $3}')" \
+              ./cmd/screen-tester/main.go
           fi
           echo "OUTPUT_NAME=$OUTPUT_NAME" >> $GITHUB_ENV
 
