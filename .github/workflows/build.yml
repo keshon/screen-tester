@@ -1,78 +1,101 @@
-name: Build & Release Binaries
+name: Build and Release
 
 on:
-  workflow_dispatch:
   push:
-    tags:
-      - 'v*.*.*'
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
-    name: Build and Upload
-    runs-on: windows-latest
-    env:
-      APP_NAME: screen-tester
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Build for multiple platforms
+        include:
+          - goos: windows
+            goarch: amd64
+            ext: .exe
+          - goos: windows
+            goarch: arm64
+            ext: .exe
+          - goos: linux
+            goarch: amd64
+            ext: ""
+          - goos: linux
+            goarch: arm64
+            ext: ""
+          - goos: darwin
+            goarch: amd64
+            ext: ""
+          - goos: darwin
+            goarch: arm64
+            ext: ""
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'  # Update to a newer version
+        
+    - name: Get dependencies
+      run: go mod download
+      
+    - name: Set build variables
+      run: |
+        echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+        echo "GO_VERSION=$(go version | cut -d' ' -f3)" >> $GITHUB_ENV
+        
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 0
+      run: |
+        mkdir -p dist
+        go build \
+          -o dist/screen-tester-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }} \
+          -ldflags "-s -w -X app/internal/version.BuildDate=${{ env.BUILD_DATE }} -X app/internal/version.GoVersion=${{ env.GO_VERSION }}" \
+          cmd/screen-tester/main.go
+          
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: screen-tester-${{ matrix.goos }}-${{ matrix.goarch }}
+        path: dist/screen-tester-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-
-      - name: Get Build Info
-        shell: pwsh
-        run: |
-          $BUILD_DATE = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-          Write-Host "BUILD_DATE=$BUILD_DATE" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-          if ($env:GITHUB_REF -like 'refs/tags/*') {
-            $VERSION = $env:GITHUB_REF -replace 'refs/tags/', ''
-          } else {
-            $VERSION = 'dev'
-          }
-          Write-Host "VERSION=$VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Build
-        shell: pwsh
-        run: |
-          $OUTPUT_NAME = "${env:APP_NAME}-windows-amd64-v${env:VERSION}.exe"
-          Write-Host "Building $OUTPUT_NAME"
-          $env:GOOS = "windows"
-          $env:GOARCH = "amd64"
-          go build -o $OUTPUT_NAME -ldflags "-X github.com/keshon/screen-tester/internal/version.BuildDate=${env:BUILD_DATE} -X github.com/keshon/screen-tester/internal/version.GoVersion=$(go version | ForEach-Object { ($_ -split ' ')[2] })" ./cmd/screen-tester/main.go
-          Write-Host "OUTPUT_NAME=$OUTPUT_NAME" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.OUTPUT_NAME }}
-          path: ${{ env.OUTPUT_NAME }}
-
-  release:
-    needs: build
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./release
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        
+    - name: Run tests
+      run: go test -v ./...
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ./release/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # Optional: Create a release when you push a tag
+  release:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          screen-tester-*/screen-tester-*
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
