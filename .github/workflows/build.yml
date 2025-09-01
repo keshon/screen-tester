@@ -9,29 +9,27 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        # Build for multiple platforms
+        # Build for multiple platforms - limited due to CGO/OpenGL requirements
         include:
           - goos: windows
             goarch: amd64
             ext: .exe
-          - goos: windows
-            goarch: arm64
-            ext: .exe
+            runner: windows-latest
           - goos: linux
             goarch: amd64
             ext: ""
-          - goos: linux
-            goarch: arm64
-            ext: ""
+            runner: ubuntu-latest
           - goos: darwin
             goarch: amd64
             ext: ""
+            runner: macos-latest
           - goos: darwin
             goarch: arm64
             ext: ""
+            runner: macos-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -41,9 +39,21 @@ jobs:
       with:
         go-version: '1.21'  # Update to a newer version
         
+    - name: Install dependencies (Linux)
+      if: matrix.goos == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev xorg-dev
+        
+    - name: Install dependencies (macOS)
+      if: matrix.goos == 'darwin'
+      run: |
+        # macOS should have OpenGL frameworks built-in
+        echo "macOS OpenGL frameworks should be available"
+      
     - name: Get dependencies
       run: go mod download
-      
+        
     - name: Set build variables
       run: |
         echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
@@ -53,12 +63,12 @@ jobs:
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
-        CGO_ENABLED: 0
+        CGO_ENABLED: 1
       run: |
         mkdir -p dist
         go build \
           -o dist/screen-tester-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }} \
-          -ldflags "-s -w -X app/internal/version.BuildDate=${{ env.BUILD_DATE }} -X app/internal/version.GoVersion=${{ env.GO_VERSION }}" \
+          -ldflags "-s -w -X github.com/keshon/screen-tester/internal/version.BuildDate=${{ env.BUILD_DATE }} -X github.com/keshon/screen-tester/internal/version.GoVersion=${{ env.GO_VERSION }}" \
           cmd/screen-tester/main.go
           
     - name: Upload artifacts
