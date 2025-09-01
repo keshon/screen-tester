@@ -54,12 +54,32 @@ jobs:
     - name: Get dependencies
       run: go mod download
         
-    - name: Set build variables
+    - name: Set build variables (Windows)
+      if: matrix.goos == 'windows'
+      run: |
+        $buildDate = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+        $goVersion = (go version).Split()[2]
+        echo "BUILD_DATE=$buildDate" >> $env:GITHUB_ENV
+        echo "GO_VERSION=$goVersion" >> $env:GITHUB_ENV
+        
+    - name: Set build variables (Unix)
+      if: matrix.goos != 'windows'
       run: |
         echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
         echo "GO_VERSION=$(go version | cut -d' ' -f3)" >> $GITHUB_ENV
         
-    - name: Build binary
+    - name: Build binary (Windows)
+      if: matrix.goos == 'windows'
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 1
+      run: |
+        mkdir -p dist
+        go build -o "dist/screen-tester-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}" -ldflags "-s -w -X github.com/keshon/screen-tester/internal/version.BuildDate=${{ env.BUILD_DATE }} -X github.com/keshon/screen-tester/internal/version.GoVersion=${{ env.GO_VERSION }}" cmd/screen-tester/main.go
+        
+    - name: Build binary (Unix)
+      if: matrix.goos != 'windows'
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
