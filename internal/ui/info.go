@@ -9,13 +9,10 @@ import (
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/text"
 	"golang.org/x/image/colornames"
-	"golang.org/x/image/font/basicfont"
 
 	"github.com/keshon/screen-tester/internal/core"
 	"github.com/keshon/screen-tester/internal/version"
 )
-
-var atlas = text.NewAtlas(basicfont.Face7x13, text.ASCII)
 
 func DrawInfo(ctx *core.WindowContext, test core.ScreenTest, opts core.TestOptions, brightness float64) {
 	lines := []string{
@@ -64,7 +61,7 @@ func DrawInfo(ctx *core.WindowContext, test core.ScreenTest, opts core.TestOptio
 
 	var boxWidth float64
 	for _, line := range lines {
-		txt := text.New(pixel.V(0, 0), atlas)
+		txt := text.New(pixel.V(0, 0), Atlas)
 		fmt.Fprint(txt, line)
 		if w := txt.Bounds().W(); w > boxWidth {
 			boxWidth = w
@@ -78,10 +75,9 @@ func DrawInfo(ctx *core.WindowContext, test core.ScreenTest, opts core.TestOptio
 	imd.Draw(ctx.Win)
 
 	for i, line := range lines {
-		txt := text.New(pixel.V(x+paddingSides/2, y-paddingTop-lineHeight*float64(i)), atlas)
+		txt := text.New(pixel.V(x+paddingSides/2, y-paddingTop-lineHeight*float64(i)), Atlas)
 		txt.Color = colornames.White
 		fmt.Fprint(txt, line)
 		txt.Draw(ctx.Win, pixel.IM)
 	}
-
 }

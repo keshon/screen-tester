@@ -27,14 +27,3 @@ func All() []ScreenTest {
 
 	return list
 }
-
-func SafeRun(test ScreenTest, ctx *WindowContext) {
-	bounds := ctx.Win.Bounds()
-	width := int(bounds.W())
-	height := int(bounds.H())
-	if width == 0 || height == 0 {
-		return
-	}
-
-	test.Run(ctx)
-}

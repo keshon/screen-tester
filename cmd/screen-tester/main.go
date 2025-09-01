@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
+	"golang.org/x/image/colornames"
 
 	"github.com/keshon/screen-tester/internal/core"
+	"github.com/keshon/screen-tester/internal/input"
 	_ "github.com/keshon/screen-tester/internal/tests" // auto-register tests
 	"github.com/keshon/screen-tester/internal/ui"
 	"github.com/keshon/screen-tester/internal/version"
@@ -35,16 +39,58 @@ func run() {
 		Brightness:   1.0,
 	}
 
-	controls := &ui.Controls{}
 	tests := core.All()
 
+	menuButtons := make([]ui.Button, 0, len(tests)+1)
+	for _, t := range tests {
+		menuButtons = append(menuButtons, ui.Button{
+			Text: t.Name(),
+		})
+	}
+	menuButtons = append(menuButtons, ui.Button{
+		Text: "Exit",
+	})
+
+	menu := &ui.Menu{
+		Buttons: menuButtons,
+		Hovered: 0,
+	}
+
+	showMenu := true
+	currentTest := tests[0]
+	testControls := &input.TestInput{}
+
 	for !win.Closed() {
-		currentTest := tests[controls.Current]
-		controls.HandleInput(ctx, tests)
-		currentTest.Run(ctx)
-		if ctx.ShowInfo {
-			ui.DrawInfo(ctx, currentTest, currentTest.Options(), ctx.Brightness)
+		ctx.Win.Clear(colornames.Black)
+		if showMenu {
+			ui.DrawTitle(ctx.Win, fmt.Sprintf("%s - %s\nMade by %s (%s)", version.AppFullName, version.AppDescription, version.AppAuthor, version.AppRepo), ctx.Win.Bounds().W(), ctx.Win.Bounds().H())
+			ui.LayoutMenuButtons(menu, ctx.Win.Bounds().W(), ctx.Win.Bounds().H())
+			ui.DrawMenu(ctx, menu)
+
+			if sel := input.HandleMenuInput(ctx, menu); sel != nil {
+				if sel.Text == "Exit" {
+					break
+				}
+
+				if menu.Hovered >= 0 && menu.Hovered < len(tests) {
+					testControls.Current = menu.Hovered
+					currentTest = tests[testControls.Current]
+					showMenu = false
+				}
+			}
+		} else {
+			currentTest = tests[testControls.Current]
+			testControls.HandleTestInput(ctx, tests)
+			if ctx.Win.JustPressed(pixelgl.KeyEscape) {
+				showMenu = true
+				continue
+			}
+			currentTest.Run(ctx)
+			if ctx.ShowInfo {
+				ui.DrawInfo(ctx, currentTest, currentTest.Options(), ctx.Brightness)
+			}
 		}
+
 		win.Update()
 	}
 }
