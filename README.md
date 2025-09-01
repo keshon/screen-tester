@@ -1,4 +1,6 @@
-# Screen Tester - Monitor test tool
+# Monitor test tool for Linux, macOS and Windows
+
+![Screen Tester Banner](./assets/banner.png)
 
 A simple fullscreen monitor testing tool written in Go using the [Pixel](https://github.com/faiface/pixel) library.  
 It provides several test screens for checking colors, gradients, dead pixels, motion clarity, and subpixel layouts.
