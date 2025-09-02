@@ -31,5 +31,5 @@ func (t *SolidWhite) Run(ctx *core.WindowContext) {
 }
 
 func init() {
-	core.Register(&SolidWhite{})
+	core.RegisterTest(&SolidWhite{})
 }

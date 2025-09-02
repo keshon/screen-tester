@@ -204,7 +204,7 @@ func (t *MotionBalls) setSpeed(d time.Duration) {
 }
 
 func init() {
-	core.Register(&MotionBalls{
+	core.RegisterTest(&MotionBalls{
 		defaultSpeed: 500 * time.Millisecond,
 		minSpeed:     50 * time.Millisecond,
 		maxSpeed:     2000 * time.Millisecond,

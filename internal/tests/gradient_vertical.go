@@ -94,5 +94,5 @@ func (t *GradientVertical) setDirection(dir string) {
 }
 
 func init() {
-	core.Register(&GradientVertical{})
+	core.RegisterTest(&GradientVertical{})
 }

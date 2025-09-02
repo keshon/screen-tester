@@ -100,7 +100,7 @@ func (t *Checkerboard) setSize(size int) {
 }
 
 func init() {
-	core.Register(&Checkerboard{
+	core.RegisterTest(&Checkerboard{
 		defaultSize: 20,
 		minSize:     2,
 		maxSize:     50,

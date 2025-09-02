@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 
@@ -39,7 +41,7 @@ func run() {
 		Brightness:   1.0,
 	}
 
-	tests := core.All()
+	tests := core.AllTests()
 
 	menuButtons := make([]ui.Button, 0, len(tests)+1)
 	for _, t := range tests {
@@ -60,10 +62,23 @@ func run() {
 	currentTest := tests[0]
 	testControls := &input.TestInput{}
 
+	cursor := imdraw.New(nil)
+
 	for !win.Closed() {
 		ctx.Win.Clear(colornames.Black)
+
 		if showMenu {
-			ui.DrawTitle(ctx.Win, fmt.Sprintf("%s - %s\nMade by %s (%s)", version.AppFullName, version.AppDescription, version.AppAuthor, version.AppRepo), ctx.Win.Bounds().W(), ctx.Win.Bounds().H())
+			ui.DrawPixelTitle(ctx.Win, "SCREEN TESTER", ctx.Win.Bounds().W(), ctx.Win.Bounds().H(), time.Now())
+			ui.DrawTitle(ctx.Win,
+				fmt.Sprintf("%s - %s\nMade by %s (%s)",
+					version.AppFullName,
+					version.AppDescription,
+					version.AppAuthor,
+					version.AppRepo),
+				ctx.Win.Bounds().W(),
+				ctx.Win.Bounds().H(),
+			)
+
 			ui.LayoutMenuButtons(menu, ctx.Win.Bounds().W(), ctx.Win.Bounds().H())
 			ui.DrawMenu(ctx, menu)
 
@@ -71,21 +86,31 @@ func run() {
 				if sel.Text == "Exit" {
 					break
 				}
-
 				if menu.Hovered >= 0 && menu.Hovered < len(tests) {
 					testControls.Current = menu.Hovered
 					currentTest = tests[testControls.Current]
 					showMenu = false
 				}
 			}
+
+			cursor.Clear()
+			cursor.Color = colornames.White
+			pos := win.MousePosition()
+			cursor.Push(pos)
+			cursor.Circle(6, 2)
+			cursor.Draw(win)
+
 		} else {
 			currentTest = tests[testControls.Current]
 			testControls.HandleTestInput(ctx, tests)
+
 			if ctx.Win.JustPressed(pixelgl.KeyEscape) {
 				showMenu = true
 				continue
 			}
+
 			currentTest.Run(ctx)
+
 			if ctx.ShowInfo {
 				ui.DrawInfo(ctx, currentTest, currentTest.Options(), ctx.Brightness)
 			}

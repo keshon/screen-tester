@@ -112,7 +112,7 @@ func (t *DeadPixelRecovery) setSpeed(d time.Duration) {
 }
 
 func init() {
-	core.Register(&DeadPixelRecovery{
+	core.RegisterTest(&DeadPixelRecovery{
 		defaultSpeed: 50 * time.Millisecond,
 		minSpeed:     10 * time.Millisecond,
 		maxSpeed:     100 * time.Millisecond,

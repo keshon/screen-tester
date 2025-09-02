@@ -6,16 +6,16 @@ import (
 
 var registry = map[string]ScreenTest{}
 
-func Register(t ScreenTest) {
+func RegisterTest(t ScreenTest) {
 	registry[t.Name()] = t
 }
 
-func Get(name string) (ScreenTest, bool) {
+func GetTest(name string) (ScreenTest, bool) {
 	t, ok := registry[name]
 	return t, ok
 }
 
-func All() []ScreenTest {
+func AllTests() []ScreenTest {
 	list := make([]ScreenTest, 0, len(registry))
 	for _, t := range registry {
 		list = append(list, t)

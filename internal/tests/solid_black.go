@@ -29,5 +29,5 @@ func (t *SolidBlack) Run(ctx *core.WindowContext) {
 }
 
 func init() {
-	core.Register(&SolidBlack{})
+	core.RegisterTest(&SolidBlack{})
 }

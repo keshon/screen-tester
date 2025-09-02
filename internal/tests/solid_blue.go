@@ -31,5 +31,5 @@ func (t *SolidBlue) Run(ctx *core.WindowContext) {
 }
 
 func init() {
-	core.Register(&SolidBlue{})
+	core.RegisterTest(&SolidBlue{})
 }

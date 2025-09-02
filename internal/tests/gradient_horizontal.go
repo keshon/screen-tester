@@ -94,5 +94,5 @@ func (t *GradientHorizontal) setDirection(dir string) {
 }
 
 func init() {
-	core.Register(&GradientHorizontal{})
+	core.RegisterTest(&GradientHorizontal{})
 }

@@ -15,7 +15,7 @@ type TestInfo struct {
 }
 
 func main() {
-	tests := core.All()
+	tests := core.AllTests()
 
 	var testInfos []TestInfo
 	for _, t := range tests {

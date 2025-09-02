@@ -97,7 +97,7 @@ func (t *PixelGrid) setSize(size int) {
 }
 
 func init() {
-	core.Register(&PixelGrid{
+	core.RegisterTest(&PixelGrid{
 		defaultSize: 20,
 		minSize:     2,
 		maxSize:     50,

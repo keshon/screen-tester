@@ -27,7 +27,6 @@ func DrawButton(ctx *core.WindowContext, btn Button, hovered bool) {
 	imd.Rectangle(0)
 	imd.Draw(ctx.Win)
 
-	// текст
 	txt := text.New(pixel.V(btn.Bounds.Min.X+10, btn.Bounds.Min.Y+10), Atlas)
 	txt.Color = colornames.White
 	fmt.Fprint(txt, btn.Text)
